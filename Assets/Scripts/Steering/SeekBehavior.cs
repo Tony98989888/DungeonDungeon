@@ -23,6 +23,9 @@ public class SeekBehavior : MonoBehaviour
     float m_senseRange;
 
     [SerializeField]
+    float m_stopRange;
+
+    [SerializeField]
     float m_turnSpeed;
 
     void UpdateSteeringState()
@@ -30,13 +33,11 @@ public class SeekBehavior : MonoBehaviour
         float distance = Vector3.Magnitude(m_target.transform.position - transform.position);
         m_desiredVelocity = (m_target.transform.position - transform.position).normalized;
 
+        if (distance < m_stopRange) { return; }
+
         if (distance > m_senseRange)
         {
             m_desiredVelocity *= m_maxVelocity;
-        }
-        else if (distance < 2)
-        {
-            m_rb.velocity = Vector3.zero;
         }
         else
         {
