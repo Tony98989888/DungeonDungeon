@@ -29,7 +29,7 @@ public class WanderingBehaviour : MonoBehaviour
     private void Update()
     {
         // Wandering point vector
-        var moveVec = transform.forward * m_circleDistance;
+        var moveVec = m_currentVelocity * m_circleDistance;
 
         // Displacement
         var displacement = Random.insideUnitSphere * m_circleDistance;
