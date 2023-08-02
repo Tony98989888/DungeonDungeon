@@ -557,9 +557,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_rb: {fileID: 1321172315}
-  m_circleDistance: 10
-  m_maxSteerSpeed: 3
-  m_turnSpeed: 3
+  m_circleDistance: 3
+  m_circleRadius: 2
+  m_maxSteerSpeed: 2
   m_maxVelocity: 5
 --- !u!54 &1321172315
 Rigidbody:

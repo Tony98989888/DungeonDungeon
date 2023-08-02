@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class WanderingBehaviour : MonoBehaviour
@@ -11,54 +12,55 @@ public class WanderingBehaviour : MonoBehaviour
     float m_circleDistance;
 
     [SerializeField]
-    float m_maxSteerSpeed;
+    float m_circleRadius;
 
     [SerializeField]
-    float m_turnSpeed;
+    float m_maxSteerSpeed;
 
     [SerializeField]
     float m_maxVelocity;
 
+    Vector3 m_steerVelocity;
     Vector3 m_currentVelocity;
 
     private void Start()
     {
         m_rb = GetComponent<Rigidbody>();
+        StartCoroutine(GenerateRandomSteerVec());
+    }
+
+    public Vector3 RandomSteerVec()
+    {
+        var circleCenterVector = m_rb.velocity.normalized * m_circleDistance;
+        var displacementVector = Random.insideUnitSphere.normalized * m_circleRadius;
+        return (circleCenterVector + displacementVector).WithY(transform.position.y);
+    }
+
+    IEnumerator GenerateRandomSteerVec() 
+    {
+        while (true) 
+        {
+            m_steerVelocity = RandomSteerVec();
+            yield return new WaitForSeconds(3);
+        }
     }
 
     private void Update()
     {
-        // Wandering point vector
-        var moveVec = m_currentVelocity * m_circleDistance;
+        var steerVec = m_steerVelocity;
 
-        // Displacement
-        var displacement = Random.insideUnitSphere * m_circleDistance;
-        displacement.y = transform.position.y;
+        Debug.DrawRay(transform.position, steerVec, Color.yellow);
 
-        // Wander velocity
-        var wanderVelocity = moveVec + displacement;
+        steerVec = Vector3.ClampMagnitude(steerVec, m_maxSteerSpeed);
+        steerVec /= m_rb.mass;
 
-        /*
-            steering = wander()
-            steering = truncate (steering, max_force)
-            steering = steering / mass
-            velocity = truncate (velocity + steering , max_speed)
-            position = position + velocity
-         */
+        Debug.DrawRay(transform.position, m_currentVelocity, Color.white);
 
-        wanderVelocity = Vector3.ClampMagnitude(wanderVelocity, m_maxSteerSpeed);
-        wanderVelocity /= m_rb.mass;
-
-        m_currentVelocity += wanderVelocity;
+        m_currentVelocity += steerVec * Time.deltaTime;
         m_currentVelocity = Vector3.ClampMagnitude(m_currentVelocity, m_maxVelocity);
 
-        transform.position += m_currentVelocity * Time.deltaTime;
+        Debug.DrawRay(transform.position, m_currentVelocity, Color.green);
 
-        // Update rotation
-        //if (m_currentVelocity != Vector3.zero)
-        //{
-        //    Quaternion targetRotation = Quaternion.LookRotation(m_currentVelocity, transform.up);
-        //    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * m_turnSpeed);
-        //}
+        transform.position += m_currentVelocity * Time.deltaTime;
     }
 }
